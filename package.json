@@ -1,0 +1,48 @@
+{
+  "name": "ncert-virtual-lab",
+  "version": "1.0.0",
+  "description": "Professional 3D Interactive NCERT Physics & Chemistry Virtual Lab",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "three": "^0.158.0",
+    "@react-three/fiber": "^8.15.11",
+    "@react-three/drei": "^9.88.13",
+    "@react-three/postprocessing": "^2.15.11",
+    "framer-motion": "^10.16.5",
+    "lucide-react": "^0.294.0",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@types/three": "^0.158.3",
+    "@vitejs/plugin-react": "^4.1.1",
+    "autoprefixer": "^10.4.16",
+    "gh-pages": "^6.0.0",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.2.2",
+    "vite": "^4.5.0"
+  },
+  "keywords": [
+    "ncert",
+    "physics",
+    "chemistry",
+    "virtual-lab",
+    "3d",
+    "education",
+    "react",
+    "threejs"
+  ],
+  "author": "VirtualLab Team",
+  "license": "MIT"
+}
