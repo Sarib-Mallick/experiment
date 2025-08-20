@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VirtualLab — Learn Experiments Visually</title>
+  <meta name="description" content="Free virtual lab guides and simulations for Chemistry, Physics and Biology. Built by students, for students." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       Design Tokens (Light = default). Dark overrides below.
+       ========================================================= */
+    :root {
+      --bg: #f6f8fc;
+      --bg-grad-1: #f6f8fc;
+      --bg-grad-2: #eef2f8;
+      --text: #111827;
+      --muted: #4b5563;
+      --card: #ffffff;
+      --stroke: rgba(17,24,39,0.08);
+      --accent: #2563eb;
+      --accent-2: #7c3aed;
+      --shadow: 0 10px 25px rgba(17,24,39,0.08);
+      --focus: 2px solid #2563eb;
+    }
+    [data-theme="dark"] {
+      --bg: #0b1220;
+      --bg-grad-1: #0b1220;
+      --bg-grad-2: #111a2e;
+      --text: #eaf0ff;
+      --muted: #b7c0d6; /* slightly brighter for contrast */
+      --card: rgba(255,255,255,0.06);
+      --stroke: rgba(255,255,255,0.12);
+      --accent: #5cc8ff;
+      --accent-2: #9d7bff;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --focus: 2px solid #5cc8ff;
+    }
+
+    /* Respect user preference on first paint when no saved theme */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 100% -10%, var(--bg-grad-2), transparent 50%),
+                  radial-gradient(1200px 800px at -10% 110%, var(--bg-grad-2), transparent 50%),
+                  linear-gradient(180deg, var(--bg-grad-1), var(--bg-grad-2));
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+
+    /* Skip link for a11y */
+    .skip-link {
+      position: absolute; left: 8px; top: -40px; padding: 8px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--stroke);
+    }
+    .skip-link:focus { top: 8px; outline: var(--focus); }
+
+    /* Header */
+    .site-header { position: sticky; top: 0; z-index: 40; backdrop-filter: saturate(140%) blur(8px); background: color-mix(in hsl, var(--bg-grad-1) 80%, transparent); border-bottom: 1px solid var(--stroke); }
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
+    .logo { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: 0.2px; text-decoration: none; color: var(--text); }
+    .logo-badge { width: 28px; height: 28px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: grid; place-items: center; box-shadow: var(--shadow); }
+    .logo-badge svg { width: 18px; height: 18px; }
+
+    nav[role="navigation"] .nav-links { display: flex; gap: 18px; align-items: center; list-style: none; margin: 0; padding: 0; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-weight: 600; padding: 8px 10px; border-radius: 10px; border: 1px solid transparent; }
+    .nav-links a:hover, .nav-links a:focus-visible { color: var(--text); border-color: var(--stroke); }
+
+    .btn { display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--stroke); text-decoration: none; font-weight: 700; cursor: pointer; transition: transform .08s ease; background: transparent; color: var(--text); }
+    .btn:active { transform: translateY(1px); }
+    .btn:focus-visible { outline: var(--focus); outline-offset: 2px; }
+    .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: white; border: none; box-shadow: var(--shadow); }
+    .btn.ghost { background: transparent; }
+
+    .menu-toggle { display: none; background: transparent; border: 1px solid var(--stroke); padding: 8px 10px; border-radius: 10px; }
+
+    /* Hero */
+    .hero { padding: 76px 0 24px; }
+    .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 26px; align-items: center; }
+    .headline { font-size: clamp(28px, 6vw, 48px); line-height: 1.05; margin: 0 0 14px; letter-spacing: -0.5px; }
+    .headline .accent-gradient { background: linear-gradient(135deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .subhead { margin: 0 0 22px; color: var(--muted); font-size: clamp(14px, 2.2vw, 18px); }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .hero-card { background: var(--card); border: 1px solid var(--stroke); border-radius: 18px; padding: 20px; position: relative; overflow: hidden; }
+    .hero-card .glow { position: absolute; inset: -30% -10% auto auto; width: 300px; height: 200px; background: radial-gradient(120px 80px at 80% 20%, color-mix(in hsl, var(--accent) 60%, white), transparent 60%); filter: blur(22px); opacity: .5; pointer-events: none; }
+    .hero-illustration { width: 100%; aspect-ratio: 4 / 3; border-radius: 14px; border: 1px dashed var(--stroke); display: grid; place-items: center; font-weight: 600; color: var(--muted); }
+    .hero-illustration .caption { text-align:center; margin-top:8px; color:var(--muted); font-size:12px; }
+
+    /* Stats */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 22px 0 10px; }
+    .stat { background: var(--card); border: 1px solid var(--stroke); border-radius: 16px; padding: 16px; text-align: center; }
+    .stat .num { font-size: clamp(22px, 4.5vw, 34px); font-weight: 800; display: block; }
+    .stat .label { color: var(--muted); font-weight: 600; }
+
+    /* Subjects */
+    #subjects { padding: 28px 0 12px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .section-head h2 { margin: 0; font-size: clamp(22px, 4.5vw, 32px); }
+
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card { background: var(--card); border: 1px solid var(--stroke); border-radius: 16px; padding: 18px; position: relative; overflow: hidden; transition: transform .12s ease, box-shadow .2s ease; }
+    .card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+    .card:focus-within { box-shadow: var(--shadow); }
+    .card .icon { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); margin-bottom: 10px; }
+    .card h3 { margin: 8px 0 8px; font-size: 18px; }
+    .card p { margin: 0 0 14px; color: var(--muted); }
+    .card a { text-decoration: none; font-weight: 700; }
+
+    /* How It Works */
+    #how { padding: 26px 0; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .step { background: var(--card); border: 1px solid var(--stroke); border-radius: 16px; padding: 18px; }
+    .step b { display: inline-block; margin-bottom: 8px; }
+
+    /* CTA */
+    .cta { margin: 28px 0; background: linear-gradient(135deg, color-mix(in hsl, var(--accent) 30%, transparent), color-mix(in hsl, var(--accent-2) 30%, transparent)); border: 1px solid var(--stroke); border-radius: 18px; padding: 20px; display: grid; grid-template-columns: 1.3fr 0.7fr; gap: 14px; align-items: center; }
+    .cta-title { margin: 0 0 8px; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--stroke); color: var(--muted); padding: 18px 0 30px; font-size: 14px; }
+
+    /* Focus styles globally */
+    a:focus-visible, button:focus-visible { outline: var(--focus); outline-offset: 2px; }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; }
+      .btn { transition: none; }
+    }
+
+    /* Responsive */
+    @media (max-width: 920px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .cta { grid-template-columns: 1fr; }
+      .steps, .cards, .stats { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .menu-toggle { display: inline-flex; }
+      nav[role="navigation"] .nav-links { position: absolute; right: 20px; top: 62px; background: var(--card); border: 1px solid var(--stroke); border-radius: 14px; padding: 8px; flex-direction: column; gap: 6px; display: none; width: calc(100% - 40px); }
+      nav[role="navigation"] .nav-links.open { display: flex; }
+      .steps, .cards, .stats { grid-template-columns: 1fr; }
+      .hero { padding-top: 56px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#home" class="skip-link">Skip to content</a>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container nav-bar">
+      <a href="#home" class="logo" aria-label="VirtualLab home">
+        <span class="logo-badge" aria-hidden="true">
+          <!-- Beaker icon -->
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <path d="M8 3h8M10 3v5l-4.8 8.7A3 3 0 0 0 8 21h8a3 3 0 0 0 2.8-4.3L14 8V3" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+            <path d="M7.5 15h9" stroke="#fff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span>VirtualLab</span>
+      </a>
+      <nav role="navigation" aria-label="Primary">
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu" aria-controls="navLinks" aria-expanded="false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="#home">Home</a></li>
+          <li><a href="chemistry.html">Chemistry</a></li>
+          <li><a href="physics.html">Physics</a></li>
+          <li><a href="biology.html">Biology</a></li>
+          <li><a href="reviews.html">Reviews</a></li>
+          <li><button class="btn ghost" id="themeToggle" aria-label="Toggle dark mode" type="button">🌓 Theme</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="home" class="hero">
+    <div class="container hero-grid">
+      <div>
+        <h1 class="headline">Bring your lab to life, <span class="accent-gradient">anytime</span>, anywhere.</h1>
+        <p class="subhead">Step‑by‑step experiments, clear diagrams, and free simulations for students who don’t get proper lab access. Built by students, for students.</p>
+        <div class="actions">
+          <a class="btn primary" href="chemistry.html">Start Learning</a>
+          <a class="btn ghost" href="#subjects">Browse Subjects</a>
+        </div>
+        <div class="stats" aria-label="Site statistics">
+          <div class="stat"><span class="num" data-count="500">0</span><span class="label">Students helped</span></div>
+          <div class="stat"><span class="num" data-count="48">0</span><span class="label">Experiments</span></div>
+          <div class="stat"><span class="num" data-count="100">0</span><span class="label">% Free forever</span></div>
+        </div>
+      </div>
+      <div class="hero-card" aria-label="Illustration card">
+        <div class="glow" aria-hidden="true"></div>
+        <div class="hero-illustration">
+          <div>
+            <!-- Simple inline SVG schematic style -->
+            <svg viewBox="0 0 240 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+              <defs>
+                <linearGradient id="g1" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#5cc8ff"/>
+                  <stop offset="100%" stop-color="#9d7bff"/>
+                </linearGradient>
+              </defs>
+              <rect x="8" y="8" width="224" height="144" rx="12" fill="none" stroke="currentColor" opacity="0.3"/>
+              <circle cx="60" cy="88" r="24" fill="none" stroke="url(#g1)" stroke-width="3"/>
+              <rect x="110" y="60" width="90" height="56" rx="8" fill="none" stroke="url(#g1)" stroke-width="3"/>
+              <path d="M60 64v-18 M60 112v18 M36 88H18 M102 88h16" stroke="currentColor" opacity="0.3" stroke-width="2"/>
+              <text x="120" y="128" font-size="10" fill="currentColor" opacity="0.5">Virtual schematic • optics</text>
+            </svg>
+            <div class="caption">Preview of a simulated setup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section id="subjects" class="container" aria-labelledby="subjects-title">
+      <div class="section-head">
+        <h2 id="subjects-title">Explore subjects</h2>
+        <a class="btn ghost" href="#how">How it works →</a>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8 3h8M10 3v5l-4.8 8.7A3 3 0 0 0 8 21h8a3 3 0 0 0 2.8-4.3L14 8V3" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Chemistry</h3>
+          <p>Reactions, titrations, qualitative analysis—clear steps with safety notes.</p>
+          <a class="btn" href="chemistry.html" aria-label="Open Chemistry">Open →</a>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 12h16M12 4v16" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Physics</h3>
+          <p>Mechanics, optics, electricity—visualize setups before the lab day.</p>
+          <a class="btn" href="physics.html" aria-label="Open Physics">Open →</a>
+        </article>
+        <article class="card">
+          <div class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 20c4.418 0 8-3.582 8-8S16.418 4 12 4 4 7.582 4 12s3.582 8 8 8Z" stroke="#fff" stroke-width="2"/><path d="M12 8v8M8 12h8" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <h3>Biology</h3>
+          <p>Microscopy basics, enzymes, genetics—clean diagrams and checkpoints.</p>
+          <a class="btn" href="biology.html" aria-label="Open Biology">Open →</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="how" class="container" aria-labelledby="how-title">
+      <div class="section-head"><h2 id="how-title">How it works</h2></div>
+      <div class="steps">
+        <div class="step"><b>1) Learn fast</b><br/>Short, visual steps for each experiment. No fluff.</div>
+        <div class="step"><b>2) See it run</b><br/>Interactive simulations & animated diagrams where possible.</div>
+        <div class="step"><b>3) Check yourself</b><br/>Quick quizzes & common mistakes to avoid marks loss.</div>
+      </div>
+    </section>
+
+    <section class="container cta" aria-labelledby="cta-title" aria-describedby="cta-desc">
+      <div>
+        <h2 id="cta-title" class="cta-title">Are we helping you?</h2>
+        <p id="cta-desc" style="margin:0 0 14px; color:var(--muted);">Leave a short review so we can fix gaps and add the next experiment you need.</p>
+        <a class="btn primary" href="reviews.html">Leave a Review</a>
+      </div>
+      <div class="hero-illustration" aria-hidden="true">
+        <div>Review highlights will appear here ✨</div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+      <div>© 2025 VirtualLab — Built for students without proper labs.</div>
+      <div><a href="about.html" style="color:inherit; text-decoration:none; border-bottom:1px dashed var(--stroke);">About</a></div>
+    </div>
+  </footer>
+
+  <script>
+    (function() {
+      const root = document.documentElement;
+
+      // Theme: use saved, else system preference on first load
+      const savedTheme = localStorage.getItem('vlab-theme');
+      if (savedTheme === 'dark' || savedTheme === 'light') {
+        root.setAttribute('data-theme', savedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        root.setAttribute('data-theme', 'dark');
+      } else {
+        root.setAttribute('data-theme', 'light');
+      }
+
+      // Theme toggle with persistence
+      const themeToggle = document.getElementById('themeToggle');
+      themeToggle?.addEventListener('click', () => {
+        const current = root.getAttribute('data-theme') || 'light';
+        const next = current === 'light' ? 'dark' : 'light';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('vlab-theme', next);
+      });
+
+      // Mobile menu toggle + a11y
+      const menuBtn = document.getElementById('menuToggle');
+      const navLinks = document.getElementById('navLinks');
+
+      const closeMenu = () => {
+        navLinks?.classList.remove('open');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', 'false');
+      };
+
+      menuBtn?.addEventListener('click', () => {
+        const isOpen = navLinks?.classList.toggle('open');
+        if (menuBtn) menuBtn.setAttribute('aria-expanded', String(!!isOpen));
+      });
+
+      // Close on outside click
+      document.addEventListener('click', (e) => {
+        if (!navLinks || !menuBtn) return;
+        if (!navLinks.contains(e.target) && !menuBtn.contains(e.target)) closeMenu();
+      });
+
+      // Close on Esc
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+
+      // Tiny count-up animation for stats (with reduced-motion + fallback)
+      const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const nums = document.querySelectorAll('.num');
+
+      const animate = (el) => {
+        const target = Number(el.dataset.count || '0');
+        if (!Number.isFinite(target)) { el.textContent = '0'; return; }
+        if (prefersReduced) { el.textContent = String(target); return; }
+        const duration = 900; // ms
+        const start = performance.now();
+        const from = 0;
+        const step = (now) => {
+          const p = Math.min(1, (now - start) / duration);
+          const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+          const val = Math.floor(from + (target - from) * eased);
+          el.textContent = String(val);
+          if (p < 1) requestAnimationFrame(step); else el.textContent = String(target);
+        };
+        requestAnimationFrame(step);
+      };
+
+      const startCounters = () => nums.forEach(n => animate(n));
+
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries, obs) => {
+          entries.forEach(e => { if (e.isIntersecting) { animate(e.target); obs.unobserve(e.target); } });
+        }, { threshold: 0.6 });
+        nums.forEach(n => io.observe(n));
+      } else {
+        // Fallback for older browsers
+        startCounters();
+      }
+
+      // Smooth scroll for internal links (respect reduced motion)
+      const smoothScroll = (id) => {
+        const el = document.querySelector(id);
+        if (!el) return;
+        const behavior = prefersReduced ? 'auto' : 'smooth';
+        el.scrollIntoView({ behavior, block: 'start' });
+      };
+
+      document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+          const id = a.getAttribute('href');
+          if (id && id.length > 1) {
+            e.preventDefault();
+            smoothScroll(id);
+            closeMenu();
+          }
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
